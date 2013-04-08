@@ -1,6 +1,6 @@
 # Tweet ROS message (also used for direct message)
 
-uint32 id	# Can be used to reply
+uint64 id	# Can be used to reply
 time stamp	# Time of tweet
 
 string user	# screen name of user that tweeted (@...)

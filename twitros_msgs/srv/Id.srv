@@ -1,4 +1,4 @@
 # A simple ID that can be used to retweet or destroy a direct message
 
-uint32 id		# Id of the tweet, direct message or user
+uint64 id		# Id of the tweet, direct message or user
 ---
