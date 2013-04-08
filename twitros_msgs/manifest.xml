@@ -1,0 +1,16 @@
+<package>
+  <description brief="twitros_msgs">
+
+     twitros_msgs: Messages for twitros.
+
+  </description>
+  <author>Adrien Tronche, Introlab</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/twitros_msgs</url>
+
+  <depend package="sensor_msgs"/>
+
+</package>
+
+
