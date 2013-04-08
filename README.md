@@ -1,9 +1,12 @@
 twitros
 =======
 
-Twitter for [ROS] [2] using new JSON API (version 1.1). Implemented using [python-twitter] [1]. Developped at [IntRoLab] [4].
+Twitter for [ROS] [2] using new JSON API (version 1.1).
+Implemented using [python-twitter] [1]. 
+Developped at [IntRoLab] [4].
 
-Please note that this project in still in its early stage of creation and is unstable at the moment.
+Please note that this project in still in its early stage of creation and 
+is unstable at the moment.
 
 Installation
 ---
@@ -12,13 +15,15 @@ After cloning, you can build twitros by running:
 
     rosmake rostweet
 
-You will need to enter your login informations during `python_twitter` building since it uses 
-[pip] [3] to install some external libraries (see [python-twitter] [1] for more details).
+You will need to enter your login informations during `python_twitter` 
+building since it uses [pip] [3] to install some external libraries 
+(see [python-twitter] [1] for more details).
 
 Introduction
 ---
 
-This projects creates a driver node that provides various twitter services and publish the tweets you receive.
+This projects creates a driver node that provides various twitter services 
+and publish the tweets you receive.
 
 Services provided
 ---
@@ -40,14 +45,16 @@ New tweets are retrieved at a rate given in parameter (default is 2 seconds)
 
 * `timeline`: tweets from your timeline.
 * `mentions`: tweets that mention you.
-* `direct_messages`: your direct messages. Tweets and Direct message use the same `rostwit_msgs/msg/Tweet.msg` message structure.
+* `direct_messages`: your direct messages. Tweets and Direct message 
+use the same `rostwit_msgs/msg/Tweet.msg` message structure.
 
 You can get more info by reading the messages from `rostweet_msgs/msg`.
 
 TODO
 ---
-* [python-twitter] [1] can do a lot more than proposed here like searching or rerieving tweets from others user. 
-More functunalities could be implemented in the future.
+* [python-twitter] [1] can do a lot more than proposed here like searching 
+or rerieving tweets from others user. More functunalities could be 
+implemented in the future.
 * Better handling of images (post and retrieve).
 
 Contact
