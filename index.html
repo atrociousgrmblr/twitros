@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+
+    <title>Twitros by namimi</title>
+  </head>
+
+  <body>
+
+    <header>
+      <div class="container">
+        <h1>Twitros</h1>
+        <h2>Twitter for ROS using new JSON API (version 1.1)</h2>
+
+        <section id="downloads">
+          <a href="https://github.com/namimi/twitros/zipball/master" class="btn">Download as .zip</a>
+          <a href="https://github.com/namimi/twitros/tarball/master" class="btn">Download as .tar.gz</a>
+          <a href="https://github.com/namimi/twitros" class="btn btn-github"><span class="icon"></span>View on GitHub</a>
+        </section>
+      </div>
+    </header>
+
+    <div class="container">
+      <section id="main_content">
+        <h1>twitros</h1>
+
+<p>Twitter for <a href="http://ros.org" title="ROS">ROS</a> using new JSON API (version 1.1). Implemented using <a href="https://github.com/bear/python-twitter" title="python-twitter">python-twitter</a>.</p>
+
+<p>Please note that this project in still in its early stage.</p>
+
+<h2>Installation</h2>
+
+<p>After cloning, you can build twitros by running:</p>
+
+<pre><code>rosmake rostweet
+</code></pre>
+
+<p>You will need to enter your login informations during <code>python_twitter</code> building since it uses 
+<a href="http://www.pip-installer.org/en/latest/" title="pip">pip</a> to install some external libraries (see <a href="https://github.com/bear/python-twitter" title="python-twitter">python-twitter</a> for more details)</p>
+
+<h2>Services provided</h2>
+
+<p>The driver provides the following services at the moment:</p>
+
+<ul>
+<li>"post_tweet": Post a tweet.</li>
+<li>"reply": Post a tweet as a reply to another tweet.</li>
+<li>"retweet": Retweet a tweet given its id.</li>
+<li>"post_dm": Send a direct message to a user.</li>
+<li>"destroy_dm": Destroy a direct message given its id.</li>
+</ul><p>You can get more info by reading the services from <code>rostweet_msgs/srv</code>.</p>
+
+<p>More things could be done using <a href="https://github.com/bear/python-twitter" title="python-twitter">python-twitter</a> API.</p>
+
+<h2>Topics published</h2>
+
+<p>New tweets are retrieved at a rate given in parameter (default is 2 seconds)</p>
+
+<ul>
+<li>timeline: tweets from your timeline.</li>
+<li>mentions: tweets that mention you.</li>
+<li>direct_messages: your direct messages. Tweets and Direct message use the same 'Tweet' message structure.</li>
+</ul><p>You can get more info by reading the messages from <code>rostweet_msgs/msg</code>.</p>
+
+<h2>TODO</h2>
+
+<ul>
+<li>Better handling of images (post and retrieve)</li>
+</ul><h2>Contact</h2>
+
+<p>You can contact me at <a href="mailto:tronche.adrien@gmail.com">tronche.adrien@gmail.com</a></p>
+      </section>
+    </div>
+
+    
+  </body>
+</html>
