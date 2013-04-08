@@ -3,50 +3,74 @@
   <head>
     <meta charset='utf-8'>
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=640" />
 
-    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+    <link rel="stylesheet" href="stylesheets/core.css" media="screen"/>
+    <link rel="stylesheet" href="stylesheets/mobile.css" media="handheld, only screen and (max-device-width:640px)"/>
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css"/>
 
+    <script type="text/javascript" src="javascripts/modernizr.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="javascripts/headsmart.min.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function () {
+        $('#main_content').headsmart()
+      })
+    </script>
     <title>Twitros by namimi</title>
   </head>
 
   <body>
+    <a id="forkme_banner" href="https://github.com/namimi/twitros">View on GitHub</a>
+    <div class="shell">
 
-    <header>
-      <div class="container">
-        <h1>Twitros</h1>
-        <h2>Twitter for ROS using new JSON API (version 1.1)</h2>
+      <header>
+        <span class="ribbon-outer">
+          <span class="ribbon-inner">
+            <h1>Twitros</h1>
+            <h2>Twitter for ROS using new JSON API (version 1.1)</h2>
+          </span>
+          <span class="left-tail"></span>
+          <span class="right-tail"></span>
+        </span>
+      </header>
 
-        <section id="downloads">
-          <a href="https://github.com/namimi/twitros/zipball/master" class="btn">Download as .zip</a>
-          <a href="https://github.com/namimi/twitros/tarball/master" class="btn">Download as .tar.gz</a>
-          <a href="https://github.com/namimi/twitros" class="btn btn-github"><span class="icon"></span>View on GitHub</a>
-        </section>
-      </div>
-    </header>
+      <section id="downloads">
+        <span class="inner">
+          <a href="https://github.com/namimi/twitros/zipball/master" class="zip"><em>download</em> .ZIP</a><a href="https://github.com/namimi/twitros/tarball/master" class="tgz"><em>download</em> .TGZ</a>
+        </span>
+      </section>
 
-    <div class="container">
+
+      <span class="banner-fix"></span>
+
+
       <section id="main_content">
         <h1>twitros</h1>
 
-<p>Twitter for <a href="http://ros.org" title="ROS">ROS</a> using new JSON API (version 1.1). Implemented using <a href="https://github.com/bear/python-twitter" title="python-twitter">python-twitter</a>. Developped at <a href="http://introlab.3it.usherbrooke.ca" title="Introlab">IntRoLab</a>.</p>
+<p>Twitter for <a href="http://ros.org" title="ROS">ROS</a> using new JSON API (version 1.1).
+Implemented using <a href="https://github.com/bear/python-twitter" title="python-twitter">python-twitter</a>. 
+Developped at <a href="http://introlab.3it.usherbrooke.ca" title="Introlab">IntRoLab</a>.</p>
 
-<p>Please note that this project in still in its early stage of creation and is unstable at the moment.</p>
+<p>Please note that this project in still in its early stage of creation and 
+is unstable at the moment.</p>
 
 <h2>Installation</h2>
 
 <p>After cloning, you can build twitros by running:</p>
 
-<pre><code>rosmake rostweet
+<pre><code>sudo apt-get install python-pip
+rosmake rostweet
 </code></pre>
 
-<p>You will need to enter your login informations during <code>python_twitter</code> building since it uses 
-<a href="http://www.pip-installer.org" title="pip">pip</a> to install some external libraries (see <a href="https://github.com/bear/python-twitter" title="python-twitter">python-twitter</a> for more details).</p>
+<p>You will need to enter your login informations during <code>python_twitter</code> 
+building since it uses <a href="http://www.pip-installer.org" title="pip">pip</a> to install some external libraries 
+(see <a href="https://github.com/bear/python-twitter" title="python-twitter">python-twitter</a> for more details).</p>
 
 <h2>Introduction</h2>
 
-<p>This projects creates a driver node that provides various twitter services and publish the tweets you receive.</p>
+<p>This projects creates a driver node that provides various twitter services 
+and publish on topics the tweets you receive.</p>
 
 <h2>Services provided</h2>
 
@@ -63,11 +87,13 @@
 <code>post_dm</code>: Send a direct message to a user.</li>
 <li>
 <code>destroy_dm</code>: Destroy a direct message given its id.</li>
-</ul><p>You can get more info by reading the services from <code>rostweet_msgs/srv</code>.</p>
+</ul><p>You can get more info by reading the services from <code>twitros_msgs/srv</code>.</p>
 
 <h2>Topics published</h2>
 
-<p>New tweets are retrieved at a rate given in parameter (default is 2 seconds)</p>
+<p>New tweets are retrieved at a rate given in parameter (default is 2 seconds).
+Each of the following bullets represents a topic that publishs 
+<code>twitros_msgs/Tweets</code> messages.</p>
 
 <ul>
 <li>
@@ -75,20 +101,35 @@
 <li>
 <code>mentions</code>: tweets that mention you.</li>
 <li>
-<code>direct_messages</code>: your direct messages. Tweets and Direct message use the same <code>rostwit_msgs/msg/Tweet.msg</code> message structure.</li>
-</ul><p>You can get more info by reading the messages from <code>rostweet_msgs/msg</code>.</p>
+<code>direct_messages</code>: your direct messages. <em>Note:</em> Tweet and Direct message 
+use the same <code>twitros_msgs/Tweet</code> message structure.</li>
+</ul><p>You can get more info by reading the messages from <code>twitros_msgs/msg</code>.</p>
 
 <h2>TODO</h2>
 
 <ul>
 <li>
-<a href="https://github.com/bear/python-twitter" title="python-twitter">python-twitter</a> can do a lot more than proposed here like searching or rerieving tweets from others user. 
-More functunalities could be implemented in the future.</li>
+<a href="https://github.com/bear/python-twitter" title="python-twitter">python-twitter</a> can do a lot more than proposed here like searching 
+or rerieving tweets from others user. More functunalities could be 
+implemented in the future.</li>
 <li>Better handling of images (post and retrieve).</li>
 </ul><h2>Contact</h2>
 
 <p>You can contact me at <a href="mailto:tronche.adrien@gmail.com">tronche.adrien@gmail.com</a></p>
       </section>
+
+      <footer>
+        <span class="ribbon-outer">
+          <span class="ribbon-inner">
+            <p>this project by <a href="https://github.com/namimi">namimi</a> can be found on <a href="https://github.com/namimi/twitros">GitHub</a></p>
+          </span>
+          <span class="left-tail"></span>
+          <span class="right-tail"></span>
+        </span>
+        <p>Generated with <a href="http://pages.github.com">GitHub Pages</a> using Merlot</p>
+        <span class="octocat"></span>
+      </footer>
+
     </div>
 
               <script type="text/javascript">
