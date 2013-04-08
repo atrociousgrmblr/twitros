@@ -1,5 +1,5 @@
 # Service to send a direct message to a user
 
-string			user 	# screen name of user to DM (@...)
-string 			text	# 140 char max
+string user 	# screen name (@...) of targeted user
+string text	# 140 char max.
 ---
