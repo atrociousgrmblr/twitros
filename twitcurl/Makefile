@@ -7,6 +7,7 @@ SVN_REVISION = -r103
 include $(shell rospack find mk)/svn_checkout.mk
 
 installed: $(SVN_DIR)
+	mkdir include include/curl lib
 	cd $(SVN_DIR) && make
 	cp $(SVN_DIR)/*.h include/
 	cp $(SVN_DIR)/curl/*.h include/curl/
@@ -17,7 +18,7 @@ installed: $(SVN_DIR)
 
 clean:
 	cd $(SVN_DIR) && make clean
-	rm lib/* include/curl/* include/* installed
+	rm -rf lib include installed
 
 wipe: clean
-	rm -rf $(SVN_DIR)
+	rm -rf build patched rospack*
