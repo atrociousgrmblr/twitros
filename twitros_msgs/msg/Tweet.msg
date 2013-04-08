@@ -1,4 +1,4 @@
-# Tweet ROS message
+# Tweet ROS message (also used for direct message)
 
 uint16			id	# Can be used to reply
 time			stamp	# Time of tweet
