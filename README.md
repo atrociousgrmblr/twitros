@@ -13,6 +13,7 @@ Installation
 
 After cloning, you can build twitros by running:
 
+    sudo apt-get install python-pip
     rosmake rostweet
 
 You will need to enter your login informations during `python_twitter` 
@@ -23,7 +24,7 @@ Introduction
 ---
 
 This projects creates a driver node that provides various twitter services 
-and publish the tweets you receive.
+and publish on topics the tweets you receive.
 
 Services provided
 ---
@@ -36,19 +37,21 @@ The driver provides the following services at the moment:
 * `post_dm`: Send a direct message to a user.
 * `destroy_dm`: Destroy a direct message given its id.
 
-You can get more info by reading the services from `rostweet_msgs/srv`.
+You can get more info by reading the services from `twitros_msgs/srv`.
 
 Topics published
 ---
 
-New tweets are retrieved at a rate given in parameter (default is 2 seconds)
+New tweets are retrieved at a rate given in parameter (default is 2 seconds).
+Each of the following bullets represents a topic that publishs 
+`twitros_msgs/Tweets` messages.
 
 * `timeline`: tweets from your timeline.
 * `mentions`: tweets that mention you.
-* `direct_messages`: your direct messages. Tweets and Direct message 
-use the same `rostwit_msgs/msg/Tweet.msg` message structure.
+* `direct_messages`: your direct messages. *Note:* Tweet and Direct message 
+use the same `twitros_msgs/Tweet` message structure.
 
-You can get more info by reading the messages from `rostweet_msgs/msg`.
+You can get more info by reading the messages from `twitros_msgs/msg`.
 
 TODO
 ---
