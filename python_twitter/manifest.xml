@@ -1,0 +1,15 @@
+<package>
+  <description brief="python_twitter">
+
+     python_twitter: Wrapper for pythn-twitter library.
+
+  </description>
+  <author>Adrien Tronche</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/python_twitter</url>
+  <rosdep name="pip"/>
+
+</package>
+
+
