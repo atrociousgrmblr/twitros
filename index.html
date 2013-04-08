@@ -30,9 +30,9 @@
       <section id="main_content">
         <h1>twitros</h1>
 
-<p>Twitter for <a href="http://ros.org" title="ROS">ROS</a> using new JSON API (version 1.1). Implemented using <a href="https://github.com/bear/python-twitter" title="python-twitter">python-twitter</a>.</p>
+<p>Twitter for <a href="http://ros.org" title="ROS">ROS</a> using new JSON API (version 1.1). Implemented using <a href="https://github.com/bear/python-twitter" title="python-twitter">python-twitter</a>. Developped at <a href="http://introlab.3it.usherbrooke.ca" title="Introlab">IntRoLab</a>.</p>
 
-<p>Please note that this project in still in its early stage.</p>
+<p>Please note that this project in still in its early stage of creation and is unstable at the moment.</p>
 
 <h2>Installation</h2>
 
@@ -42,42 +42,65 @@
 </code></pre>
 
 <p>You will need to enter your login informations during <code>python_twitter</code> building since it uses 
-<a href="http://www.pip-installer.org/en/latest/" title="pip">pip</a> to install some external libraries (see <a href="https://github.com/bear/python-twitter" title="python-twitter">python-twitter</a> for more details)</p>
+<a href="http://www.pip-installer.org" title="pip">pip</a> to install some external libraries (see <a href="https://github.com/bear/python-twitter" title="python-twitter">python-twitter</a> for more details).</p>
+
+<h2>Introduction</h2>
+
+<p>This projects creates a driver node that provides various twitter services and publish the tweets you receive.</p>
 
 <h2>Services provided</h2>
 
 <p>The driver provides the following services at the moment:</p>
 
 <ul>
-<li>"post_tweet": Post a tweet.</li>
-<li>"reply": Post a tweet as a reply to another tweet.</li>
-<li>"retweet": Retweet a tweet given its id.</li>
-<li>"post_dm": Send a direct message to a user.</li>
-<li>"destroy_dm": Destroy a direct message given its id.</li>
+<li>
+<code>post_tweet</code>: Post a tweet.</li>
+<li>
+<code>reply</code>: Post a tweet as a reply to another tweet.</li>
+<li>
+<code>retweet</code>: Retweet a tweet given its id.</li>
+<li>
+<code>post_dm</code>: Send a direct message to a user.</li>
+<li>
+<code>destroy_dm</code>: Destroy a direct message given its id.</li>
 </ul><p>You can get more info by reading the services from <code>rostweet_msgs/srv</code>.</p>
-
-<p>More things could be done using <a href="https://github.com/bear/python-twitter" title="python-twitter">python-twitter</a> API.</p>
 
 <h2>Topics published</h2>
 
 <p>New tweets are retrieved at a rate given in parameter (default is 2 seconds)</p>
 
 <ul>
-<li>timeline: tweets from your timeline.</li>
-<li>mentions: tweets that mention you.</li>
-<li>direct_messages: your direct messages. Tweets and Direct message use the same 'Tweet' message structure.</li>
+<li>
+<code>timeline</code>: tweets from your timeline.</li>
+<li>
+<code>mentions</code>: tweets that mention you.</li>
+<li>
+<code>direct_messages</code>: your direct messages. Tweets and Direct message use the same <code>rostwit_msgs/msg/Tweet.msg</code> message structure.</li>
 </ul><p>You can get more info by reading the messages from <code>rostweet_msgs/msg</code>.</p>
 
 <h2>TODO</h2>
 
 <ul>
-<li>Better handling of images (post and retrieve)</li>
+<li>
+<a href="https://github.com/bear/python-twitter" title="python-twitter">python-twitter</a> can do a lot more than proposed here like searching or rerieving tweets from others user. 
+More functunalities could be implemented in the future.</li>
+<li>Better handling of images (post and retrieve).</li>
 </ul><h2>Contact</h2>
 
 <p>You can contact me at <a href="mailto:tronche.adrien@gmail.com">tronche.adrien@gmail.com</a></p>
       </section>
     </div>
 
-    
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-39917555-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
   </body>
 </html>
