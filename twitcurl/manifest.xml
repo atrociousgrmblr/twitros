@@ -1,0 +1,20 @@
+<package>
+  <description brief="twitcurl">
+
+     twitcurl: ROS wrapper for twitcurl (https://code.google.com/p/twitcurl/)
+     		Checkout locked at revision 103. 
+		Supposed to work with new Twitter API 1.1 based on JSON
+
+  </description>
+  <author>Adrien Tronche</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/twitcurl</url>
+
+  <export>
+  	<cpp cflags="-I${prefix}/include" lflags="-Wl,-rpath,${prefix}/lib  -L${prefix}/lib -lcurl -ltwitcurl" />
+  </export>
+
+</package>
+
+
