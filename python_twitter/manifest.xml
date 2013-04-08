@@ -8,7 +8,6 @@
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/python_twitter</url>
-  <rosdep name="pip"/>
 
 </package>
 
