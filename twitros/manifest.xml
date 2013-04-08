@@ -1,0 +1,20 @@
+<package>
+  <description brief="twitros">
+
+     twitros: Twitter driver for ROS. Provides an easy way to send and
+     		receive tweets inside the ROS framework.
+
+  </description>
+  <author>Adrien Tronche, Introlab</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/twitros</url>
+  <depend package="rospy"/>
+  <depend package="python_twitter"/>
+  <depend package="twitros_msgs"/>
+  
+  <depend package="cv_bridge"/>
+
+</package>
+
+
