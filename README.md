@@ -54,7 +54,7 @@ Once you have your token you can use it by setting the `token_key`
 and `token_secret` parameters:
 
 <pre><code>&lt;launch>
-    &lt;node name="twitros" pkg="twitros" type="twitter.py">
+    &lt;node name="twitros" pkg="twitros" type="twitter.py" output="screen">
         &lt;rosparam name="token_key" value="PUT_KEY_HERE"/>
         &lt;rosparam name="token_secret" value="PUT_SECRET_HERE"/>
 	&lt;/node>
@@ -76,7 +76,7 @@ You can get more info by reading the services in `twitros_msgs/srv` folder.
 Topics published
 ---
 
-New tweets are retrieved at a rate given in parameter (default is 2 seconds).
+New tweets are retrieved at a rate given in parameter (default is 15 seconds).
 Each of the following bullets represents a topic that publishs 
 `twitros_msgs/Tweets` messages.
 
