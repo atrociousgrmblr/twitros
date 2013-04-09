@@ -1,51 +1,36 @@
 <!DOCTYPE html>
 <html>
+
   <head>
-    <meta charset='utf-8'>
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <meta name="viewport" content="width=640" />
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="TwitROS : Twitter for ROS! " />
 
-    <link rel="stylesheet" href="stylesheets/core.css" media="screen"/>
-    <link rel="stylesheet" href="stylesheets/mobile.css" media="handheld, only screen and (max-device-width:640px)"/>
-    <link rel="stylesheet" href="stylesheets/pygment_trac.css"/>
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
 
-    <script type="text/javascript" src="javascripts/modernizr.js"></script>
-    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-    <script type="text/javascript" src="javascripts/headsmart.min.js"></script>
-    <script type="text/javascript">
-      $(document).ready(function () {
-        $('#main_content').headsmart()
-      })
-    </script>
-    <title>Twitros by namimi</title>
+    <title>TwitROS</title>
   </head>
 
   <body>
-    <a id="forkme_banner" href="https://github.com/namimi/twitros">View on GitHub</a>
-    <div class="shell">
 
-      <header>
-        <span class="ribbon-outer">
-          <span class="ribbon-inner">
-            <h1>Twitros</h1>
-            <h2>Twitter for ROS using new JSON API (version 1.1)</h2>
-          </span>
-          <span class="left-tail"></span>
-          <span class="right-tail"></span>
-        </span>
-      </header>
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/namimi/twitros">View on GitHub</a>
 
-      <section id="downloads">
-        <span class="inner">
-          <a href="https://github.com/namimi/twitros/zipball/master" class="zip"><em>download</em> .ZIP</a><a href="https://github.com/namimi/twitros/tarball/master" class="tgz"><em>download</em> .TGZ</a>
-        </span>
-      </section>
+          <h1 id="project_title">TwitROS</h1>
+          <h2 id="project_tagline">Twitter for ROS! </h2>
 
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/namimi/twitros/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/namimi/twitros/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
 
-      <span class="banner-fix"></span>
-
-
-      <section id="main_content">
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
         <h1>twitros</h1>
 
 <p>Twitter for <a href="http://ros.org" title="ROS">ROS</a> using new JSON API (version 1.1).
@@ -67,10 +52,45 @@ rosmake rostweet
 building since it uses <a href="http://www.pip-installer.org" title="pip">pip</a> to install some external libraries 
 (see <a href="https://github.com/bear/python-twitter" title="python-twitter">python-twitter</a> for more details).</p>
 
+<p>Don't forget to make the python files runable:</p>
+
+<pre><code>roscd twitros
+chmod +x src/twitter.py
+</code></pre>
+
 <h2>Introduction</h2>
 
 <p>This projects creates a driver node that provides various twitter services 
 and publish on topics the tweets you receive.</p>
+
+<h2>Running the server</h2>
+
+<p>We provide a sample launchfile you can run. In this one, OAuth ROS 
+parameters are not set so you will be prompted to create a token.
+You will need to copy the URL and paste it in your browser, connect
+to your twitter account, authorize twitros and copy the given pincode
+in the 
+You can then copy the generated token and use it later through <code>rosparam</code>
+(see next section).</p>
+
+<pre><code>roslaunch twitros twitter.launch
+</code></pre>
+
+<p>If OAuth is a success, you should see your twitter username appears.</p>
+
+<pre>Twitter connected as USERNAME!</pre>
+
+<h2>Using OAuth</h2>
+
+<p>Once you have your token you can use it by setting the <code>token_key</code> 
+and <code>token_secret</code> parameters:</p>
+
+<pre><code>&lt;launch&gt;
+    &lt;node name="twitros" pkg="twitros" type="twitter.py"&gt;
+        &lt;rosparam name="token_key" value="PUT_KEY_HERE"/&gt;
+        &lt;rosparam name="token_secret" value="PUT_SECRET_HERE"/&gt;
+    &lt;/node&gt;
+&lt;/launch&gt;</code></pre>
 
 <h2>Services provided</h2>
 
@@ -87,7 +107,7 @@ and publish on topics the tweets you receive.</p>
 <code>post_dm</code>: Send a direct message to a user.</li>
 <li>
 <code>destroy_dm</code>: Destroy a direct message given its id.</li>
-</ul><p>You can get more info by reading the services from <code>twitros_msgs/srv</code>.</p>
+</ul><p>You can get more info by reading the services in <code>twitros_msgs/srv</code> folder.</p>
 
 <h2>Topics published</h2>
 
@@ -103,7 +123,7 @@ Each of the following bullets represents a topic that publishs
 <li>
 <code>direct_messages</code>: your direct messages. <em>Note:</em> Tweet and Direct message 
 use the same <code>twitros_msgs/Tweet</code> message structure.</li>
-</ul><p>You can get more info by reading the messages from <code>twitros_msgs/msg</code>.</p>
+</ul><p>You can get more info by reading the messages in <code>twitros_msgs/msg</code> folder.</p>
 
 <h2>TODO</h2>
 
@@ -117,19 +137,14 @@ implemented in the future.</li>
 
 <p>You can contact me at <a href="mailto:tronche.adrien@gmail.com">tronche.adrien@gmail.com</a></p>
       </section>
+    </div>
 
-      <footer>
-        <span class="ribbon-outer">
-          <span class="ribbon-inner">
-            <p>this project by <a href="https://github.com/namimi">namimi</a> can be found on <a href="https://github.com/namimi/twitros">GitHub</a></p>
-          </span>
-          <span class="left-tail"></span>
-          <span class="right-tail"></span>
-        </span>
-        <p>Generated with <a href="http://pages.github.com">GitHub Pages</a> using Merlot</p>
-        <span class="octocat"></span>
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">TwitROS maintained by <a href="https://github.com/namimi">namimi</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
       </footer>
-
     </div>
 
               <script type="text/javascript">
@@ -142,6 +157,7 @@ implemented in the future.</li>
             pageTracker._trackPageview();
             } catch(err) {}
           </script>
+
 
   </body>
 </html>
