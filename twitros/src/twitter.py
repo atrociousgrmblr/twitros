@@ -58,8 +58,8 @@ class TwitterServer:
 	self.retweet = rospy.Service('retweet', Id, self.retweet_cb)
 	self.reply = rospy.Service('reply_tweet', Reply, self.reply_cb)
 
-	self.follow = rospy.Service('follow', Id, self.follow_cb)
-	self.unfollow = rospy.Service('unfollow', Id, self.unfollow_cb)
+	self.follow = rospy.Service('follow', User, self.follow_cb)
+	self.unfollow = rospy.Service('unfollow', User, self.unfollow_cb)
 	
 	self.post_dm = rospy.Service('post_dm', DirectMessage, self.post_dm_cb)
 	self.destroy = rospy.Service('destroy_dm', Id, self.destroy_cb)
@@ -169,11 +169,11 @@ class TwitterServer:
     
     def follow_cb(self, req):
         result = self.api.CreateFrienship(req.id)
-	return IdResponse()
+	return UserResponse()
     
     def unfollow_cb(self, req):
         result = self.api.DestroyFrienship(req.id)
-	return IdResponse()
+	return UserResponse()
 
     def post_dm_cb(self, req):
         result = self.api.PostDirectMessage(req.user, req.text)
