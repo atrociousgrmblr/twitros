@@ -1,6 +1,0 @@
-# Service to reply to a Tweet
-
-uint64 reply_to_id 	# ID of the tweet to reply
-string text		# 140 char max
-sensor_msgs/Image image	# Optional
----
