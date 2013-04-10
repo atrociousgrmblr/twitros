@@ -72,9 +72,11 @@ You can get more info by reading the services in `twitros_msgs/srv` folder.
 Topics published
 ---
 
-New tweets are retrieved at a variable rate depending on [API limits] [5]
+New tweets are retrieved at a variable rate depending on [API limits] [5].
 Each of the following bullets represents a topic that publishs 
 `twitros_msgs/Tweets` messages.
+The server succesfully retrieves images (saving to `/tmp`) and converts them
+to `sensors_msgs/Image` using [OpenCV] [6] and [cv_bridge] [7].
 
 * `timeline`: tweets from your timeline.
 * `mentions`: tweets that mention you.
@@ -87,7 +89,7 @@ TODO
 ---
 * [ptt] [1] is supposed to implement the whole API. More features could be 
 implemented in the ROS server in the future.
-* Better handling of images (post and retrieve).
+* Post images.
 
 Contact
 ---
@@ -99,3 +101,5 @@ You can contact me at tronche.adrien@gmail.com
 [3]: http://www.pip-installer.org "pip"
 [4]: http://introlab.3it.usherbrooke.ca "Introlab"
 [5]: https://dev.twitter.com/docs/rate-limiting/1.1 "Twitter rate limiting"
+[6]: http://opencv.willowgarage.com/documentation/python/reading_and_writing_images_and_video.html "OpenCV python Load/Save"
+[7]: https://ros.org/wiki/cv_bridge "cv_bridge wiki"
