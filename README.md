@@ -2,7 +2,7 @@ TwitROS
 =======
 
 Twitter driver for [ROS] [2] in python.
-Implemented using [python-twitter] [1]. 
+Implemented using [ptt] [1]. 
 Developped at [IntRoLab] [4].
 
 Please note that this project in still in its early stage of creation and 
@@ -13,12 +13,7 @@ Installation
 
 After cloning, you can build twitros by running:
 
-    sudo apt-get install python-pip
-    rosmake rostweet
-
-You will need to enter your login informations during `python_twitter` 
-building since it uses [pip] [3] to install some external libraries 
-(see [python-twitter] [1] for more details).
+    rosmake twitros
 
 Don't forget to make the python files runable:
     
@@ -44,8 +39,8 @@ You can then copy the generated token and use it later through `rosparam`
 
     roslaunch twitros twitter.launch
     
-If OAuth is a success, you should see your twitter username appears.
-<pre>Twitter connected as USERNAME!</pre>
+If OAuth is a success, you should see your name appears under the form:
+<pre>Twitter connected as NAME (@SCREEN_NAME)!</pre>
 
 Using OAuth
 ---
@@ -65,10 +60,9 @@ Services provided
 
 The driver provides the following services at the moment:
 
-* `post_tweet`: Post a tweet.
-* `reply_tweet`: Post a tweet as a reply to another tweet.
+* `post_tweet`: Post a tweet. You can also mark it as a reply.
 * `retweet`: Retweet a tweet given its id.
-* `follow`: Follow a user
+* `follow`: Follow a user.
 * `unfollow`: Unfollow a user.
 * `post_dm`: Send a direct message to a user.
 * `destroy_dm`: Destroy a direct message given its id.
@@ -78,7 +72,7 @@ You can get more info by reading the services in `twitros_msgs/srv` folder.
 Topics published
 ---
 
-New tweets are retrieved at a rate given in parameter (default is 15 seconds).
+New tweets are retrieved at a variable rate depending on [API limits] [5]
 Each of the following bullets represents a topic that publishs 
 `twitros_msgs/Tweets` messages.
 
@@ -91,9 +85,8 @@ You can get more info by reading the messages in `twitros_msgs/msg` folder.
 
 TODO
 ---
-* [python-twitter] [1] can do a lot more than proposed here like searching 
-or rerieving tweets from others user. More features could be implemented 
-in the future.
+* [ptt] [1] is supposed to implement the whole API. More features could be 
+implemented in the ROS server in the future.
 * Better handling of images (post and retrieve).
 
 Contact
@@ -101,7 +94,8 @@ Contact
 
 You can contact me at tronche.adrien@gmail.com
 
-[1]: https://github.com/bear/python-twitter "python-twitter"
+[1]: http://mike.verdone.ca/twitter/ "ptt"
 [2]: http://ros.org "ROS"
 [3]: http://www.pip-installer.org "pip"
 [4]: http://introlab.3it.usherbrooke.ca "Introlab"
+[5]: https://dev.twitter.com/docs/rate-limiting/1.1 "Twitter rate limiting"
