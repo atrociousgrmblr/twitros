@@ -14,6 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# TODO: Need to work on rates limit.
+
 import os
 import sys
 
@@ -134,7 +136,7 @@ class TwitterServer:
                     oauth_token_secret = access_token['oauth_token_secret']
 		    # TODO: Write OAuth info somewhere.
 	else:
-		rospy.loginfo("Using the following parameters for oauth:"
+	    rospy.loginfo("Using the following parameters for oauth:"
 		    + "key: {key}, ".format(key = oauth_token_key)
 		    + "secret: {secret}".format(secret = oauth_token_secret))
 
@@ -236,7 +238,8 @@ class TwitterServer:
 
     # Retrieve updates in timeline, mentions, and direct messages
     def timer_cb(self, event):
-        # Timeline
+        # Timeline: To be changed when 1.1 is on.
+	#statuses = self.api.GetHomeTimeline( since_id = self.last_timeline )
 	statuses = self.api.GetFriendsTimeline( since_id = self.last_timeline )
 	timeline_msg = self.process_tweets( statuses )
 	if len(timeline_msg.tweets):
