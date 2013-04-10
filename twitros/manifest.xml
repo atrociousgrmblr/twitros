@@ -10,10 +10,10 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/twitros</url>
   <depend package="rospy"/>
-  <depend package="python_twitter"/>
-  <depend package="twitros_msgs"/>
-  
   <depend package="cv_bridge"/>
+  
+  <depend package="ptt"/>
+  <depend package="twitros_msgs"/>
 
 </package>
 

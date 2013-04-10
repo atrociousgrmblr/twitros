@@ -24,20 +24,7 @@ import roslib; roslib.load_manifest('twitros')
 import rospy
 
 # Twitter API from python_twitter
-import twitter
-
-# OAUth
-try:
-  from urlparse import parse_qsl
-except:
-  from cgi import parse_qsl
-
-import oauth2 as oauth
-
-REQUEST_TOKEN_URL = 'https://api.twitter.com/oauth/request_token'
-ACCESS_TOKEN_URL  = 'https://api.twitter.com/oauth/access_token'
-AUTHORIZATION_URL = 'https://api.twitter.com/oauth/authorize'
-SIGNIN_URL        = 'https://api.twitter.com/oauth/authenticate'
+from twitter import *
 
 # To manage pictures
 import urllib
@@ -71,7 +58,6 @@ class TwitterServer:
 	self.last_timeline = 0
 	self.last_dm = 0
 
-	self.api = twitter.Api()
 	oauth_token_key = None
 	oauth_token_secret = None
 
@@ -85,56 +71,11 @@ class TwitterServer:
 	if oauth_token_key is None or oauth_token_secret is None:
 	    rospy.loginfo('No OAuth information given, trying to create...')
 
-	    signature_method_hmac_sha1 = oauth.SignatureMethod_HMAC_SHA1()
-	    oauth_consumer = oauth.Consumer(key = 'HbAfkrfiw0s7Es4TVrpSuw', 
-	    		secret = 'oIjEOsEbHprUa7EOi3Mo8rNBdQlHjTGPEpGrItZj8c')
-	    oauth_client = oauth.Client(oauth_consumer)
+	    oauth_dance( "IntRoLab TwitROS", 'HbAfkrfiw0s7Es4TVrpSuw',
+                'oIjEOsEbHprUa7EOi3Mo8rNBdQlHjTGPEpGrItZj8c', creds)
 
-            # Request token
-	    resp, content = oauth_client.request(REQUEST_TOKEN_URL, 'GET')
-	    
-	    if resp['status'] != '200':
-  	        rospy.logerr("Invalid respond from Twitter requesting temp "
-			+ "token: {resp}".format( resp=resp['status'] ) )
-		sys.exit()
-            else:
-                request_token = dict(parse_qsl(content))
+	    oauth_token_key, oauth_token_secret = read_token_file( creds )
 
-	        rospy.loginfo("Please visit this Twitter page and retrieve the"
-		    + " pincode to be used in the next step to obtaining an "
-		    + "Authentication Token: \n{url}?oauth_token={token}".
-			format( url=AUTHORIZATION_URL, 
-				token=request_token['oauth_token']) )
-
-	        pincode = raw_input('Pincode? ')
-
-  		token = oauth.Token(request_token['oauth_token'], 
-				request_token['oauth_token_secret'])
-  		token.set_verifier(pincode)
-
-  		rospy.loginfo('Generating and signing request for a token')
-
-  		oauth_client  = oauth.Client(oauth_consumer, token)
-  		resp, content = oauth_client.request( ACCESS_TOKEN_URL, 
-			method='POST', 
-			body='oauth_callback=oob&oauth_verifier=%s' % pincode)
-  		access_token  = dict(parse_qsl(content))
-
-  		if resp['status'] != '200':
-    		    rospy.logerr("The request for a Token did not succeed:"
-		    		+ "{e}".format( e = resp['status'] ))
-		    sys.exit()
-    		    #ros.loginfo( access_token )
-  		else:
-    		    rospy.loginfo("Your Twitter Access Token key: [{key}] ".
-		    	    format( key=access_token['oauth_token'] )
-		        + "and Access Token secret: [{secret}].".
-		    	    format( secret=access_token['oauth_token_secret'] )
-			+ "\nPlease copy those for future use.")
-
-            	    oauth_token_key = access_token['oauth_token']
-                    oauth_token_secret = access_token['oauth_token_secret']
-		    # TODO: Write OAuth info somewhere.
 	else:
 	    rospy.loginfo("Using the following parameters for oauth:"
 		    + "key: {key}, ".format(key = oauth_token_key)
@@ -142,70 +83,74 @@ class TwitterServer:
 
 	# Consumer key and secret are specific to this App.
 	# Access token are given through OAuth for those consumer params
-	rospy.loginfo('Trying to log API...')
-	self.api = twitter.Api(
-	    consumer_key = 'HbAfkrfiw0s7Es4TVrpSuw',
-            consumer_secret = 'oIjEOsEbHprUa7EOi3Mo8rNBdQlHjTGPEpGrItZj8c',
-            access_token_key = oauth_token_key,
-            access_token_secret = oauth_token_secret )
+	rospy.loginfo('Trying to log into Twitter API...')
+	self.api = twitter( auth=OAuth(oauth_token_key, oauth_token_secret 
+	   		'HbAfkrfiw0s7Es4TVrpSuw',
+	   		'oIjEOsEbHprUa7EOi3Mo8rNBdQlHjTGPEpGrItZj8c'))
 	
-	result = self.api.VerifyCredentials()
-	rospy.loginfo('Twitter connected as {user}!'
-				.format(user = result.screen_name))
+	result = self.api.account.verify_credentials()
+	rospy.loginfo('Twitter connected as {name} (@{user})!'
+		.format(name = result['name'], user = result['screen_name']))
 
 	# Create a bridge for images conversions
 	self.bridge = CvBridge()
 	
-	# Create timer for tweet retrieval
-	self.timer = rospy.Timer(rospy.Duration(15), self.timer_cb)
+	# Create timers for tweet retrieval
+	self.timer_home = rospy.Timer(rospy.Duration(2), self.timer_home_cb)
+	self.timer_mentions = rospy.Timer(rospy.Duration(2), 
+						self.timer_mentions_cb)
+	self.timer_dm = rospy.Timer(rospy.Duration(2), self.timer_dm_cb)
 
     # Services callbacks
     # TODO: Find a good way to detect failures. Post images.
     def post_cb(self, req):
-        result = self.api.PostUpdate(req.text)
+        if (req.reply_id == 0):
+            result = self.api.statuses.update( text = req.text )
+	else:
+            result = self.api.statuses.update( text = req.text,
+	    			in_reply_to_status_id = req.reply_id )
 	return PostResponse()
 
     def retweet_cb(self, req):
-        result = self.api.PostRetweet(req.id)
+        result = self.api.statuses.retweet( id = req.id )
 	return IdResponse()
     
     def follow_cb(self, req):
-        result = self.api.CreateFrienship(req.id)
+        result = self.api.friendships.create( screen_name = req.user )
 	return UserResponse()
     
     def unfollow_cb(self, req):
-        result = self.api.DestroyFrienship(req.id)
+        result = self.api.friendships.destroy( screen_name = req.user )
 	return UserResponse()
 
     def post_dm_cb(self, req):
-        result = self.api.PostDirectMessage(req.user, req.text)
+        result = self.api.direct_messages.new( 
+			screen_name = req.user, text = req.text )
 	return DirectMessageResponse()
     
     def destroy_cb(self, req):
-        result = self.api.DestroyDirectMessage(req.id)
+        result = self.api.direct_messages.destroy( id = req.id )
 	return IdResponse()
     
-    def reply_cb(self, req):
-        result = self.api.PostUpdate(req.text, req.reply_to_id)
-	return ReplyResponse()
-
-    # Convert tweets from python-twitter structure to ROS structure
-    # Args: statuses: An array of statuses returned by Api.GetXXX().
+    # Convert tweets from twitter structure to ROS structure
+    # Args: statuses: An array of statuses returned by the api call.
     def process_tweets(self, statuses):
         msg = Tweets()
 	for s in statuses:
 	    tweet = Tweet()
-	    tweet.id = s.id
-	    tweet.stamp = rospy.Time( s.created_at_in_seconds )
-	    tweet.user = s.user.screen_name
-	    tweet.name = s.user.name
-	    tweet.text = s.text
+	    tweet.id = s['id']
+	    ts = time.strftime('%Y-%m-%d %H:%M:%S', 
+	    	time.strptime(s['created_at'],'%a %b %d %H:%M:%S +0000 %Y'))
+	    tweet.stamp = rospy.Time.from_sec( time.mktime(ts) )
+	    tweet.user = s['user']['screen_name']
+	    tweet.name = s['user']['name']
+	    tweet.text = s['text']
 
-	    if s.urls is not None:
-            	for url in s.urls:
+	    for entities in s['entities']:
+            	 if entities['type'] is "photo":
 	            # Download image
 	            r = urllib.URLopener()
-		    r.retrieve(url, '/tmp/pic.jpg')
+		    r.retrieve(entities['media_url'], '/tmp/pic.jpg')
 
 		    # Read/Load with OpenCV
 		    cv_image = cv.LoadImage('/tmp/pic.jpg')
@@ -227,39 +172,79 @@ class TwitterServer:
         msg = Tweets()
 	for m in dm:
 	    tweet = Tweet()
-	    tweet.id = m.id
-	    tweet.stamp = rospy.Time( m.created_at_in_seconds )
-	    tweet.user = m.sender_screen_name
-	    tweet.name = self.api.GetUser(m.sender_id).name # Retrieve name
-	    tweet.text = m.text
+	    tweet.id = m['id']
+	    ts = time.strftime('%Y-%m-%d %H:%M:%S', 
+	    	time.strptime(m['created_at'],'%a %b %d %H:%M:%S +0000 %Y'))
+	    tweet.stamp = rospy.Time.from_sec( time.mktime(ts) )
+	    tweet.user = m['sender_screen_name']
+	    tweet.name = m['sender']['name']
+	    tweet.text = m['text']
 	    msg.tweets.append(tweet)
 
 	return msg
 
     # Retrieve updates in timeline, mentions, and direct messages
-    def timer_cb(self, event):
+    def timer_home_cb(self, event):
         # Timeline: To be changed when 1.1 is on.
 	#statuses = self.api.GetHomeTimeline( since_id = self.last_timeline )
-	statuses = self.api.GetFriendsTimeline( since_id = self.last_timeline )
+	statuses = self.api.statuses.home_timeline( 
+				since_id = self.last_timeline )
 	timeline_msg = self.process_tweets( statuses )
 	if len(timeline_msg.tweets):
 	    # Copy id of last tweet
 	    self.last_timeline = timeline_msg.tweets[0].id
 	    self.pub_timeline.publish( timeline_msg )
 	
+	# Reset tiler to stick to rate limits 
+	# See: https://dev.twitter.com/docs/rate-limiting/1.1/limits
+	del self.timer_home
+	response = self.api.application.rate_limit_status(
+					ressources = "statuses" )
+	frame = rospy.Duration( rospy.Time.from_sec( 
+	    response['/statuses/home_timeline']['reset']) - rospy.Time.now())
+	period = rospy.Duration.from_sec( frame.to_sec() 
+	    / response['/statuses/home_timeline']['remaining'] )
+	self.timer_home = rospy.Timer( period, self.timer_home_cb )
+
+	
+    def timer_mentions_cb(self, event):
 	# Mentions (exact same process)
-	mentions = self.api.GetMentions( since_id = self.last_mention )
+	mentions = self.api.statuses.mentions_timeline( 
+					since_id = self.last_mention )
 	mentions_msg = self.process_tweets( mentions )
 	if len(mentions_msg.tweets):
 	    self.last_mention = mentions_msg.tweets[0].id
 	    self.pub_mentions.publish( mentions_msg )
+	
+	# Update rate
+	del self.timer_mentions
+	response = self.api.application.rate_limit_status(
+					ressources = "statuses" )
+	frame = rospy.Duration( rospy.Time.from_sec( 
+	    response['/statuses/mentions_timeline']['reset']) 
+	        - rospy.Time.now())
+	period = rospy.Duration.from_sec( frame.to_sec() 
+	    / response['/statuses/mentions_timeline']['remaining'] )
+	self.timer_mentions = rospy.Timer( period, self.timer_mentions_cb )
 
-	# Direct messages
-	dm = self.api.GetDirectMessages( since_id = self.last_dm )
+    def timer_dm_cb(self, event):
+	# Direct messages (make sure to not skip status)
+	dm = self.api.direct_messages( since_id = self.last_dm, 
+					skip_status = False )
 	dm_msg = self.process_dm( dm )
 	if len(dm_msg.tweets):
 	    self.last_dm = dm_msg.tweets[0].id
 	    self.pub_dm.publish( dm_msg )
+	
+	# Update rate
+	del self.timer_dm
+	response = self.api.application.rate_limit_status(
+					resources = "direct_messages" )
+	frame = rospy.Duration( rospy.Time.from_sec( 
+	    response['/direct_messages']['reset']) - rospy.Time.now() )
+	period = rospy.Duration.from_sec( 
+	    frame.to_sec() / response['direct_messages']['remaining'] )
+	self.timer_mentions = rospy.Timer( period, self.timer_mentions_cb )
 
 if __name__ == '__main__' :
     rospy.init_node('twitter_server')
