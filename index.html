@@ -34,7 +34,7 @@
         <h1>TwitROS</h1>
 
 <p>Twitter driver for <a href="http://ros.org" title="ROS">ROS</a> in python.
-Implemented using <a href="https://github.com/bear/python-twitter" title="python-twitter">python-twitter</a>. 
+Implemented using <a href="http://mike.verdone.ca/twitter/" title="ptt">ptt</a>. 
 Developped at <a href="http://introlab.3it.usherbrooke.ca" title="Introlab">IntRoLab</a>.</p>
 
 <p>Please note that this project in still in its early stage of creation and 
@@ -44,13 +44,8 @@ is unstable at the moment.</p>
 
 <p>After cloning, you can build twitros by running:</p>
 
-<pre><code>sudo apt-get install python-pip
-rosmake rostweet
+<pre><code>rosmake twitros
 </code></pre>
-
-<p>You will need to enter your login informations during <code>python_twitter</code> 
-building since it uses <a href="http://www.pip-installer.org" title="pip">pip</a> to install some external libraries 
-(see <a href="https://github.com/bear/python-twitter" title="python-twitter">python-twitter</a> for more details).</p>
 
 <p>Don't forget to make the python files runable:</p>
 
@@ -76,9 +71,9 @@ You can then copy the generated token and use it later through <code>rosparam</c
 <pre><code>roslaunch twitros twitter.launch
 </code></pre>
 
-<p>If OAuth is a success, you should see your twitter username appears.</p>
+<p>If OAuth is a success, you should see your name appears under the form:</p>
 
-<pre>Twitter connected as USERNAME!</pre>
+<pre>Twitter connected as NAME (@SCREEN_NAME)!</pre>
 
 <h2>Using OAuth</h2>
 
@@ -98,13 +93,11 @@ and <code>token_secret</code> parameters:</p>
 
 <ul>
 <li>
-<code>post_tweet</code>: Post a tweet.</li>
-<li>
-<code>reply_tweet</code>: Post a tweet as a reply to another tweet.</li>
+<code>post_tweet</code>: Post a tweet. You can also mark it as a reply.</li>
 <li>
 <code>retweet</code>: Retweet a tweet given its id.</li>
 <li>
-<code>follow</code>: Follow a user</li>
+<code>follow</code>: Follow a user.</li>
 <li>
 <code>unfollow</code>: Unfollow a user.</li>
 <li>
@@ -115,9 +108,11 @@ and <code>token_secret</code> parameters:</p>
 
 <h2>Topics published</h2>
 
-<p>New tweets are retrieved at a rate given in parameter (default is 15 seconds).
+<p>New tweets are retrieved at a variable rate depending on <a href="https://dev.twitter.com/docs/rate-limiting/1.1" title="Twitter rate limiting">API limits</a>.
 Each of the following bullets represents a topic that publishs 
-<code>twitros_msgs/Tweets</code> messages.</p>
+<code>twitros_msgs/Tweets</code> messages.
+The server succesfully retrieves images (saving to <code>/tmp</code>) and converts them
+to <code>sensors_msgs/Image</code> using <a href="http://opencv.willowgarage.com/documentation/python/reading_and_writing_images_and_video.html" title="OpenCV python Load/Save">OpenCV</a> and <a href="https://ros.org/wiki/cv_bridge" title="cv_bridge wiki">cv_bridge</a>.</p>
 
 <ul>
 <li>
@@ -133,10 +128,9 @@ use the same <code>twitros_msgs/Tweet</code> message structure.</li>
 
 <ul>
 <li>
-<a href="https://github.com/bear/python-twitter" title="python-twitter">python-twitter</a> can do a lot more than proposed here like searching 
-or rerieving tweets from others user. More features could be implemented 
-in the future.</li>
-<li>Better handling of images (post and retrieve).</li>
+<a href="http://mike.verdone.ca/twitter/" title="ptt">ptt</a> is supposed to implement the whole API. More features could be 
+implemented in the ROS server in the future.</li>
+<li>Post images.</li>
 </ul><h2>Contact</h2>
 
 <p>You can contact me at <a href="mailto:tronche.adrien@gmail.com">tronche.adrien@gmail.com</a></p>
