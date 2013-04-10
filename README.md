@@ -1,7 +1,7 @@
-twitros
+TwitROS
 =======
 
-Twitter for [ROS] [2] using new JSON API (version 1.1).
+Twitter driver for [ROS] [2] in python.
 Implemented using [python-twitter] [1]. 
 Developped at [IntRoLab] [4].
 
@@ -54,7 +54,7 @@ Once you have your token you can use it by setting the `token_key`
 and `token_secret` parameters:
 
 <pre><code>&lt;launch>
-    &lt;node name="twitros" pkg="twitros" type="twitter.py">
+    &lt;node name="twitros" pkg="twitros" type="twitter.py" output="screen">
         &lt;rosparam name="token_key" value="PUT_KEY_HERE"/>
         &lt;rosparam name="token_secret" value="PUT_SECRET_HERE"/>
 	&lt;/node>
@@ -66,8 +66,10 @@ Services provided
 The driver provides the following services at the moment:
 
 * `post_tweet`: Post a tweet.
-* `reply`: Post a tweet as a reply to another tweet.
+* `reply_tweet`: Post a tweet as a reply to another tweet.
 * `retweet`: Retweet a tweet given its id.
+* `follow`: Follow a user
+* `unfollow`: Unfollow a user.
 * `post_dm`: Send a direct message to a user.
 * `destroy_dm`: Destroy a direct message given its id.
 
@@ -76,7 +78,7 @@ You can get more info by reading the services in `twitros_msgs/srv` folder.
 Topics published
 ---
 
-New tweets are retrieved at a rate given in parameter (default is 2 seconds).
+New tweets are retrieved at a rate given in parameter (default is 15 seconds).
 Each of the following bullets represents a topic that publishs 
 `twitros_msgs/Tweets` messages.
 
@@ -90,8 +92,8 @@ You can get more info by reading the messages in `twitros_msgs/msg` folder.
 TODO
 ---
 * [python-twitter] [1] can do a lot more than proposed here like searching 
-or rerieving tweets from others user. More functunalities could be 
-implemented in the future.
+or rerieving tweets from others user. More features could be implemented 
+in the future.
 * Better handling of images (post and retrieve).
 
 Contact

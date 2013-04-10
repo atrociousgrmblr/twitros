@@ -1,0 +1,4 @@
+# Service containing a user screen_name. Used to follow and unfollow.
+
+string user
+---
