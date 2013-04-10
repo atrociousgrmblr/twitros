@@ -1,0 +1,14 @@
+<package>
+  <description brief="ptt">
+
+     ptt: Wrapper for python twitter library by Mike Verdone (sixohsix).
+
+  </description>
+  <author>Adrien Tronche</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://mike.verdone.ca/twitter/</url>
+
+</package>
+
+
