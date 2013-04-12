@@ -13,6 +13,7 @@
   <depend package="cv_bridge"/>
   
   <depend package="ptt"/>
+  <depend package="twython"/>
   <depend package="twitros_msgs"/>
 
 </package>

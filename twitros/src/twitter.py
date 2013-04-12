@@ -25,6 +25,9 @@ import rospy
 # Twitter API from ptt
 from twitter import *
 
+# Twitter API from pwython (for posting images)
+from twython import Twython
+
 # To manage pictures
 import urllib
 import cv
@@ -47,16 +50,9 @@ class TwitterServer:
         self.pub_timeline = rospy.Publisher('timeline', Tweets, latch = latch)
         self.pub_mentions = rospy.Publisher('mentions', Tweets, latch = latch)
         self.pub_dm = rospy.Publisher('direct_messages', Tweets, latch = latch)
-
-	# Advertise services
-	self.post = rospy.Service('post_tweet', Post, self.post_cb)
-	self.retweet = rospy.Service('retweet', Id, self.retweet_cb)
-
-	self.follow = rospy.Service('follow', User, self.follow_cb)
-	self.unfollow = rospy.Service('unfollow', User, self.unfollow_cb)
 	
-	self.post_dm = rospy.Service('post_dm', DirectMessage, self.post_dm_cb)
-	self.destroy = rospy.Service('destroy_dm', Id, self.destroy_cb)
+	# Create a bridge for images conversions
+	self.bridge = CvBridge()
 
 	# Last Tweets (init values are twitter API default)
 	self.last_mention = 12345
@@ -97,8 +93,21 @@ class TwitterServer:
 	rospy.loginfo('Twitter connected as {name} (@{user})!'
 		.format(name = result['name'], user = result['screen_name']))
 
-	# Create a bridge for images conversions
-	self.bridge = CvBridge()
+	# Twython (for posting images)
+	self.twython = Twython(app_key= 'HbAfkrfiw0s7Es4TVrpSuw',
+            app_secret='oIjEOsEbHprUa7EOi3Mo8rNBdQlHjTGPEpGrItZj8c',
+            oauth_token=oauth_token_key,
+            oauth_token_secret=oauth_token_secret)
+
+	# Advertise services
+	self.post = rospy.Service('post_tweet', Post, self.post_cb)
+	self.retweet = rospy.Service('retweet', Id, self.retweet_cb)
+
+	self.follow = rospy.Service('follow', User, self.follow_cb)
+	self.unfollow = rospy.Service('unfollow', User, self.unfollow_cb)
+	
+	self.post_dm = rospy.Service('post_dm', DirectMessage, self.post_dm_cb)
+	self.destroy = rospy.Service('destroy_dm', Id, self.destroy_cb)
 	
 	# Create timers for tweet retrieval
 	timer_home = rospy.Timer(rospy.Duration(1), self.timer_home_cb, 
@@ -115,22 +124,20 @@ class TwitterServer:
 	    # Convert from ROS message using cv_bridge.
             try:
 	        cv_image = self.bridge.imgmsg_to_cv( req.image, 
-		                                  encoding='passthrough')
+		                        desired_encoding = 'passthrough')
 	    except CvBridgeError, e:
       		rospy.logerr(e)
 
 	    # Write to JPG with OpenCV
-	    path = '/tmp/pic_ul_{time}.jpg'.format( time = time() )
+	    path = "/tmp/pic_ul_{time}.png".format( time = time() )
 	    cv.SaveImage( path, cv_image)
-
-            if (req.reply_id == 0):
-                result = self.api.statuses.update_with_media( status = req.text,
-					media = [path] )
-	    else:
-                result = self.api.statuses.update_with_media( status = req.text,
-		    media = [path], in_reply_to_status_id = req.reply_id )
             
-	    #os.system('rm -vf ' + path)
+            if (req.reply_id == 0):
+                r = self.twython.updateStatusWithMedia( file_ = path, 
+	    		status = req.text )
+	    else:
+                r = self.twython.updateStatusWithMedia( file_ = path, 
+	    		status = req.text, in_reply_status_id = req.reply_id )
 	
         elif (req.reply_id == 0):
             result = self.api.statuses.update( status = req.text, )
