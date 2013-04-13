@@ -11,9 +11,6 @@
   <url>http://ros.org/wiki/twitros</url>
   <depend package="rospy"/>
   <depend package="cv_bridge"/>
-  
-  <depend package="ptt"/>
-  <depend package="twython"/>
   <depend package="twitros_msgs"/>
 
 </package>
