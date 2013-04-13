@@ -33,12 +33,19 @@
       <section id="main_content" class="inner">
         <h1>TwitROS</h1>
 
-<p>Twitter driver for <a href="http://ros.org" title="ROS">ROS</a> in python.
-Implemented using <a href="http://mike.verdone.ca/twitter/" title="ptt">ptt</a>. 
+<p><a href="http://twitter.com" title="Twitter">Twitter</a> driver for <a href="http://ros.org" title="ROS">ROS</a> in python.
+Implemented using <a href="https://github.com/ryanmcgrath/twython" title="Twython">twython</a>. 
 Developped at <a href="http://introlab.3it.usherbrooke.ca" title="Introlab">IntRoLab</a>.</p>
 
 <p>Please note that this project in still in its early stage of creation and 
 is unstable at the moment.</p>
+
+<h2>Dependencies</h2>
+
+<p>TwitROS uses <a href="https://github.com/ryanmcgrath/twython" title="Twython">twython</a> as its twitter library:</p>
+
+<pre><code>(pip install | easy_install) requests requests_oauth twython
+</code></pre>
 
 <h2>Installation</h2>
 
@@ -77,12 +84,12 @@ You can then copy the generated token and use it later through <code>rosparam</c
 
 <h2>Using OAuth</h2>
 
-<p>Once you have your token you can use it by setting the <code>token_key</code> 
+<p>Once you have your token you can use it by setting the <code>token</code> 
 and <code>token_secret</code> parameters:</p>
 
 <pre><code>&lt;launch&gt;
     &lt;node name="twitros" pkg="twitros" type="twitter.py" output="screen"&gt;
-        &lt;rosparam name="token_key" value="PUT_KEY_HERE"/&gt;
+        &lt;rosparam name="token" value="PUT_KEY_HERE"/&gt;
         &lt;rosparam name="token_secret" value="PUT_SECRET_HERE"/&gt;
     &lt;/node&gt;
 &lt;/launch&gt;</code></pre>
@@ -124,16 +131,19 @@ to <code>sensors_msgs/Image</code> using <a href="http://opencv.willowgarage.com
 use the same <code>twitros_msgs/Tweet</code> message structure.</li>
 </ul><p>You can get more info by reading the messages in <code>twitros_msgs/msg</code> folder.</p>
 
+<h2>Test script</h2>
+
+<p>A test script for posting a picture if provided in <code>twitros/scripts/</code>.</p>
+
 <h2>TODO</h2>
 
 <ul>
 <li>
-<a href="http://mike.verdone.ca/twitter/" title="ptt">ptt</a> is supposed to implement the whole API. More features could be 
-implemented in the ROS server in the future.</li>
-<li>Post images.</li>
-</ul><h2>Contact</h2>
-
-<p>You can contact me at <a href="mailto:tronche.adrien@gmail.com">tronche.adrien@gmail.com</a></p>
+<a href="https://github.com/ryanmcgrath/twython" title="Twython">twython</a> is supposed to implement the whole API. More features 
+could be implemented in the ROS server in the future.</li>
+<li>Post images in direct messages (not supposed to be done in directly in
+twitter).</li>
+</ul>
       </section>
     </div>
 
