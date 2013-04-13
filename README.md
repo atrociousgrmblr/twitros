@@ -89,7 +89,7 @@ TODO
 ---
 * [ptt] [1] is supposed to implement the whole API. More features could be 
 implemented in the ROS server in the future.
-* Post images.
+* Post images in direct messages.
 
 Contact
 ---
