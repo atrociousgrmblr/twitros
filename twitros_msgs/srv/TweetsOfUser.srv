@@ -1,5 +1,0 @@
-# Get tweets of a specific user
-
-string user 		# screen_name
----
-Tweets[] tweets		# Array of tweet messages.

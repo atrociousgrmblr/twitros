@@ -3,4 +3,7 @@
 string text		# 140 char max
 uint64 reply_id		# Optional (id of the tweet replied)
 sensor_msgs/Image image	# Optional
+
 ---
+
+uint64 id		# ID of the posted tweet.

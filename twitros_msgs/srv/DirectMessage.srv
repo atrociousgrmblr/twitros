@@ -2,4 +2,7 @@
 
 string user 	# screen name (@...) of targeted user
 string text	# 140 char max.
+
 ---
+
+uint64 id	# ID of the dirrect message
