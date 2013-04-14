@@ -27,20 +27,11 @@ Don't forget to make the python files runable:
     roscd twitros
     chmod +x src/twitter.py
 
-Introduction
----
-
-This projects creates a driver node that provides various twitter services 
-and publish on topics the tweets you receive.
-
-Running the server
+Running the Twitter server
 ---
 
 We provide a sample launchfile you can run. In this one, OAuth ROS 
 parameters are not set so you will be prompted to create a token.
-You will need to copy the URL and paste it in your browser, connect
-to your twitter account, authorize twitros and copy the given pincode
-in the 
 You can then copy the generated token and use it later through `rosparam`
 (see next section).
 
@@ -67,12 +58,14 @@ Services provided
 
 The driver provides the following services at the moment:
 
-* `post_tweet`: Post a tweet. You can also mark it as a reply.
+* `post_tweet`: Post a tweet. You can also mark it as a reply. Return the
+tweet id.
 * `retweet`: Retweet a tweet given its id.
 * `follow`: Follow a user.
 * `unfollow`: Unfollow a user.
-* `post_dm`: Send a direct message to a user.
+* `post_dm`: Send a direct message to a user. Return an id. 
 * `destroy_dm`: Destroy a direct message given its id.
+* `timeline`: Return the timeline of a user.
 
 You can get more info by reading the services in `twitros_msgs/srv` folder.
 
@@ -80,17 +73,30 @@ Topics published
 ---
 
 New tweets are retrieved at a variable rate depending on [API limits] [5].
+Current rate limits allow a message to be published every minute 
+approximatively.
 Each of the following bullets represents a topic that publishs 
 `twitros_msgs/Tweets` messages.
 The server succesfully retrieves images (saving to `/tmp`) and converts them
 to `sensors_msgs/Image` using [OpenCV] [6] and [cv_bridge] [7].
 
-* `timeline`: tweets from your timeline.
+* `home_timeline`: tweets from your timeline.
 * `mentions`: tweets that mention you.
 * `direct_messages`: your direct messages. *Note:* Tweet and Direct message 
 use the same `twitros_msgs/Tweet` message structure.
 
 You can get more info by reading the messages in `twitros_msgs/msg` folder.
+
+ROS parameters
+---
+Parameters you can set:
+
+* `latch`: Topics latch tweets. (default: <code>false</code>).
+* `replace_dm`: If it's not possible to send a direct message, replace by
+send a public tweet under the form:
+<pre>@USER TEXT</pre> 
+It can be useful since you can't send a direct message to someone not 
+following you. (default: <code>false</code>).
 
 Test script
 ---
@@ -100,7 +106,7 @@ A test script for posting a picture if provided in `twitros/scripts/`.
 TODO
 ---
 * [twython] [1] is supposed to implement the whole API. More features 
-could be implemented in the ROS server in the future.
+could be implemented in the ROS server in the future (searching, etc...).
 * Post images in direct messages (not supposed to be done in directly in
 twitter).
 
