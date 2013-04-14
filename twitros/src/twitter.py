@@ -8,7 +8,7 @@ from time import time, mktime, strftime, strptime
 import roslib; roslib.load_manifest('twitros')
 import rospy
 
-# Twitter API from pwython 
+# Twitter API from twython 
 from twython import Twython
 
 # To manage pictures
@@ -16,21 +16,26 @@ import urllib
 import cv
 from cv_bridge import CvBridge, CvBridgeError
 
-# Messages and services
+# Messages and services for twitros
 from twitros_msgs.msg import *
 from twitros_msgs.srv import *
 
 class TwitterServer:
     def __init__(self):
 
-        # You can choose to latch tweets
+        # You can choose to latch tweets topics
+	latch = False
 	if rospy.has_param('latch'):
 	    latch = rospy.get_param('latch')
-	else:
-	    latch = False
+
+	# In case you can't direct message a user, replace DM with a public
+	#	'@user text' tweet.
+	replace_dm = False
+	if rospy.has_param('replace_dm'):
+	    replace_dm = rospy.get_param('replace_dm')
     	
-	# Publish mentions, timeline and direct messages
-        self.pub_timeline = rospy.Publisher('timeline', Tweets, latch = latch)
+	# Publish mentions, home timeline and direct messages
+        self.pub_home = rospy.Publisher('home_timeline', Tweets, latch = latch)
         self.pub_mentions = rospy.Publisher('mentions', Tweets, latch = latch)
         self.pub_dm = rospy.Publisher('direct_messages', Tweets, latch = latch)
 	
@@ -91,6 +96,9 @@ class TwitterServer:
 	
 	self.post_dm = rospy.Service('post_dm', DirectMessage, self.post_dm_cb)
 	self.destroy = rospy.Service('destroy_dm', Id, self.destroy_cb)
+
+	self.timeline = rospy.Service('user_timeline', 
+					Timeline, self.user_timeline_cb)
 	
 	# Create timers for tweet retrieval
 	timer_home = rospy.Timer(rospy.Duration(1), self.timer_home_cb, 
@@ -100,8 +108,9 @@ class TwitterServer:
 	timer_dm = rospy.Timer(rospy.Duration(3), self.timer_dm_cb,
 							oneshot = True )
 
-    # Services callbacks
+    # Tweet callback
     def post_cb(self, req):
+	rospy.logdebug('Received a tweet: ' + req.txt)
         # Handle image
     	if (req.image.height != 0):
 	    # Convert from ROS message using cv_bridge.
@@ -114,41 +123,102 @@ class TwitterServer:
 	    # Write to JPG with OpenCV
 	    path = "/tmp/pic_ul_{time}.png".format( time = time() )
 	    cv.SaveImage( path, cv_image)
+	    os.system('rm -f ' + path)
             
             if (req.reply_id == 0):
-                r = self.twython.updateStatusWithMedia( file_ = path, 
+                result = self.t.updateStatusWithMedia( file_ = path, 
 	    		status = req.text )
 	    else:
-                r = self.twython.updateStatusWithMedia( file_ = path, 
+                result = self.t.updateStatusWithMedia( file_ = path, 
 	    		status = req.text, in_reply_status_id = req.reply_id )
 	
         elif (req.reply_id == 0):
-            result = self.twython.updateStatus( status = req.text )
+            result = self.t.updateStatus( status = req.text )
 	else:
-            result = self.twython.updateStatus( status = req.text,
+            result = self.t.updateStatus( status = req.text,
 	    			in_reply_to_status_id = req.reply_id )
-	return PostResponse()
+	
+	# Return false if call failed
+	if self.t.get_lastfunction_header('status') != '200 OK':
+	    return None
+	else: 
+	    return PostResponse(id = result['id'])
 
     def retweet_cb(self, req):
         result = self.t.retweet( id = req.id )
-	return IdResponse()
+	if self.t.get_lastfunction_header('status') != '200 OK':
+	    return None
+	else: 
+	    return IdResponse()
     
+    # Does not raise an error if you are already following the user
     def follow_cb(self, req):
+	rospy.logdebug('Asked to follow:' + req.user)
         result = self.t.createFriendship( screen_name = req.user )
-	return UserResponse()
+	if self.t.get_lastfunction_header('status') != '200 OK':
+	    return None
+	else: 
+	    return UserResponse()
     
+    # Does not raise an error if you are not following the user
     def unfollow_cb(self, req):
+	rospy.logdebug('Asked to unfollow:' + req.user)
         result = self.t.destroyFriendship( screen_name = req.user )
-	return UserResponse()
+	if self.t.get_lastfunction_header('status') != '200 OK':
+	    return None
+	else: 
+	    return UserResponse()
 
+    # Send direct message.
     def post_dm_cb(self, req):
-        result = self.t.sendDirectMessage( 
+	rospy.logdebug('Received DM to ' + req.user + ': ' + req.text)
+        
+	# First, check if you can dm the user
+	relation = self.t.showFriendship( 
+		source_screen_name = , target_screen_name = req.user )
+	
+	if self.t.get_lastfunction_header('status') != '200 OK':
+	    rospy.logerr('Failed to get friendship information.')
+	    return None
+
+	# If he can, send a direct message
+	if relation['source']['can-dm'] == 'true':
+            result = self.t.sendDirectMessage( 
 			screen_name = req.user, text = req.text )
-	return DirectMessageResponse()
+    # If he cant but was allowed to send a tweet instead, tweet with mention
+	elif replace_dm:
+	    rospy.logwarn("You can't send a direct message to " + req.user 
+	    	+ ". Sending a public tweet...")
+            result = self.t.updateStatus( 
+	    		status = "@" + req.user + " " + req.text )
+	else:
+	    rospy.logwarn("You can't send a direct message to " + req.user)
+	    return None
+
+	if self.t.get_lastfunction_header('status') != '200 OK':
+	    return None
+	else:
+	    return DirectMessageResponse(id = result['id'])
     
     def destroy_cb(self, req):
         result = self.t.destroyDirectMessage( id = req.id )
-	return IdResponse()
+
+	if self.t.get_lastfunction_header('status') != '200 OK':
+	    return None
+	else: 
+	    return IdResponse()
+
+    def user_timeline_cb(self, req):
+        result = self.t.getUserTimeline( screen_name = req.user )
+	if self.t.get_lastfunction_header('status') != '200 OK':
+	    return None
+	else: 
+	    msg = self.process_tweets( result )
+	    if msg:
+	        return TimelineResponse( tweets = msg )
+	    else:
+	        rospy.logwarn(req.user + ' has no tweets in its timeline.')
+	        return TimelineResponse( )
     
     # Convert tweets from twitter structure to ROS structure
     # Args: statuses: An array of statuses returned by the api call.
@@ -179,7 +249,7 @@ class TwitterServer:
 
 		        # Read/Load with OpenCV
 		        cv_image = cv.LoadImage(path)
-		        #os.system('rm -vf ' + path)
+		        os.system('rm -f ' + path)
 
 		        # Convert to ROS message using CV bridge.
 		        try:
@@ -221,7 +291,7 @@ class TwitterServer:
 	if len(timeline_msg.tweets):
 	    # Copy id of last tweet
 	    self.last_timeline = timeline_msg.tweets[0].id
-	    self.pub_timeline.publish( timeline_msg )
+	    self.pub_home.publish( timeline_msg )
 	
 	# Reset timer to stick to rate limits 
 	# See: https://dev.twitter.com/docs/rate-limiting/1.1/limits
@@ -264,8 +334,6 @@ class TwitterServer:
 	    						/ remaining )
 	    timer_mentions = rospy.Timer( period, self.timer_mentions_cb,
 	    						oneshot = True )
-	    #rospy.loginfo("Twitter: rem: {rem}, next: {per}".format(
-		#rem = response.rate_limit_remaining, per = period.to_sec()) )
 
     def timer_dm_cb(self, event):
 	# Direct messages (make sure to not skip status)
