@@ -55,6 +55,7 @@ class TwitterServer:
 	    oauth_token = rospy.get_param('~token')
 	if rospy.has_param('~token_secret'):
 	    oauth_token_secret = rospy.get_param('~token_secret')
+	    
 
 	# OAuth token creation (see get_access_token.py from python-twitter)
 	if oauth_token is None or oauth_token_secret is None:
@@ -62,8 +63,25 @@ class TwitterServer:
 
 	    t = Twython( app_key =  'HbAfkrfiw0s7Es4TVrpSuw',
                 app_secret = 'oIjEOsEbHprUa7EOi3Mo8rNBdQlHjTGPEpGrItZj8c')
+	
+	    # Get AUth URL. Use for login for security, 
+	    # screen_name can be on rosparam
+	    if rospy.has_param('~screen_name'):
+	    	sn = rospy.get_param('~screen_name')
+	    	url = t.get_authentication_tokens( 
+	    		screen_name = sn, force_login = True)
+	    else:
+	    	url = t.get_authentication_tokens( force_login = True )
 
-	    auth_props = t.get_authentication_tokens()
+	    # Open web browser on given url
+	    import webbrowser
+	    webbrowser.open( url['auth_url'] )
+
+	    # Enter pincode
+	    pincode = raw_input('Pincode: ')
+
+	    auth_props = t.get_authorized_tokens( oauth_verifier = int(pincode) )
+
 	    oauth_token = auth_props['oauth_token']
 	    oauth_token_secret = auth_props['oauth_token_secret']
 
@@ -86,6 +104,9 @@ class TwitterServer:
 	result = self.t.verifyCredentials();
 	rospy.loginfo('Twitter connected as {name} (@{user})!'
 		.format(name = result['name'], user = result['screen_name']))
+
+	# Stock screen name (used to show friendships)
+	self.name = result['screen_name']
 
 	# Advertise services
 	self.post = rospy.Service('post_tweet', Post, self.post_cb)
@@ -175,7 +196,7 @@ class TwitterServer:
         
 	# First, check if you can dm the user
 	relation = self.t.showFriendship( 
-		source_screen_name = , target_screen_name = req.user )
+		source_screen_name = self.name, target_screen_name = req.user )
 	
 	if self.t.get_lastfunction_header('status') != '200 OK':
 	    rospy.logerr('Failed to get friendship information.')
