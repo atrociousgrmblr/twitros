@@ -3,6 +3,9 @@
 string user 	# screen name (@...) of targeted user
 string text	# 140 char max.
 
+# Optional. Since twitter doesnt support image in dm, use a free 
+# hosting site to upload and give link in text (postimage.org by default)
+sensor_msgs/Image[] images
 ---
 
-uint64 id	# ID of the dirrect message
+uint64 id	# ID of the direct message

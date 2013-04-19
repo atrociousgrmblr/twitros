@@ -1,8 +1,11 @@
 # Service to post a Tweet
 
-string text		# 140 char max
-uint64 reply_id		# Optional (id of the tweet replied)
-sensor_msgs/Image image	# Optional
+string text			# 140 char max
+uint64 reply_id			# Optional (id of the tweet replied)
+
+# Optional. If more than one image, use a free hosting site to upload and
+# give link in tweet text (postimage.org by default)
+sensor_msgs/Image[] images	
 
 ---
 
