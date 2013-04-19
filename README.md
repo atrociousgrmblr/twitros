@@ -13,7 +13,7 @@ Dependencies
 
 TwitROS uses [twython] [1] as its twitter library:
 
-    (pip install | easy_install) requests requests_oauth twython
+    (pip install | easy_install) twython beautifulsoup4
 
 Installation
 ---
@@ -59,13 +59,14 @@ Services provided
 The driver provides the following services at the moment:
 
 * `post_tweet`: Post a tweet. You can also mark it as a reply. Return the
-tweet id.
+tweet id. See section about image posting.
 * `retweet`: Retweet a tweet given its id.
 * `follow`: Follow a user.
 * `unfollow`: Unfollow a user.
 * `post_dm`: Send a direct message to a user. Return an id. 
+See section about image posting.
 * `destroy_dm`: Destroy a direct message given its id.
-* `timeline`: Return the timeline of a user.
+* `user_timeline`: Return the timeline of a user (array of tweets).
 
 You can get more info by reading the services in `twitros_msgs/srv` folder.
 
@@ -77,8 +78,9 @@ Current rate limits allow a message to be published every minute
 approximatively.
 Each of the following bullets represents a topic that publishs 
 `twitros_msgs/Tweets` messages.
-The server succesfully retrieves images (saving to `/tmp`) and converts them
-to `sensors_msgs/Image` using [OpenCV] [6] and [cv_bridge] [7].
+The server succesfully retrieves images (saving to `/tmp` then deleting) 
+and converts them to `sensors_msgs/Image` using [OpenCV] [6] 
+and [cv_bridge] [7].
 
 * `home_timeline`: tweets from your timeline.
 * `mentions`: tweets that mention you.
@@ -98,17 +100,21 @@ send a public tweet under the form:
 It can be useful since you can't send a direct message to someone not 
 following you. (default: <code>false</code>).
 
-Test script
+Script
 ---
+Some test scripts are given in `twitros/scripts/`.
 
-A test script for posting a picture if provided in `twitros/scripts/`.
+* `tweet.py`: Post a tweet with images
+* `direct_message.py`: Post a tweet with images
 
-TODO
+Images posting
 ---
-* [twython] [1] is supposed to implement the whole API. More features 
-could be implemented in the ROS server in the future (searching, etc...).
-* Post images in direct messages (not supposed to be done in directly in
-twitter).
+Twitter support only image posting in tweets and only one image can be 
+joined per tweets. `twitros` enables to post multiple images indirectly 
+by hosting them on [postimage] [9]. [postimage] [9] is always used when
+you add image to a `twitros_msgs/DirectMessage` request and add the
+gallery url at the end of the tweet. On `twitros_msgs/Post` requests,
+it will use [postimage] [9] only if there is more than one.
 
 [1]: https://github.com/ryanmcgrath/twython "Twython"
 [2]: http://ros.org "ROS"
@@ -118,3 +124,4 @@ twitter).
 [6]: http://opencv.willowgarage.com/documentation/python/reading_and_writing_images_and_video.html "OpenCV python Load/Save"
 [7]: https://ros.org/wiki/cv_bridge "cv_bridge wiki"
 [8]: http://twitter.com "Twitter"
+[9]: http://postimage.org "PostImage, free image hosting."
