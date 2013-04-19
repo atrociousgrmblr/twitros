@@ -44,7 +44,7 @@ is unstable at the moment.</p>
 
 <p>TwitROS uses <a href="https://github.com/ryanmcgrath/twython" title="Twython">twython</a> as its twitter library:</p>
 
-<pre><code>(pip install | easy_install) requests requests_oauth twython
+<pre><code>(pip install | easy_install) twython beautifulsoup4
 </code></pre>
 
 <h2>Installation</h2>
@@ -60,18 +60,10 @@ is unstable at the moment.</p>
 chmod +x src/twitter.py
 </code></pre>
 
-<h2>Introduction</h2>
-
-<p>This projects creates a driver node that provides various twitter services 
-and publish on topics the tweets you receive.</p>
-
-<h2>Running the server</h2>
+<h2>Running the Twitter server</h2>
 
 <p>We provide a sample launchfile you can run. In this one, OAuth ROS 
 parameters are not set so you will be prompted to create a token.
-You will need to copy the URL and paste it in your browser, connect
-to your twitter account, authorize twitros and copy the given pincode
-in the 
 You can then copy the generated token and use it later through <code>rosparam</code>
 (see next section).</p>
 
@@ -100,7 +92,8 @@ and <code>token_secret</code> parameters:</p>
 
 <ul>
 <li>
-<code>post_tweet</code>: Post a tweet. You can also mark it as a reply.</li>
+<code>post_tweet</code>: Post a tweet. You can also mark it as a reply. Return the
+tweet id. See section about image posting.</li>
 <li>
 <code>retweet</code>: Retweet a tweet given its id.</li>
 <li>
@@ -108,22 +101,28 @@ and <code>token_secret</code> parameters:</p>
 <li>
 <code>unfollow</code>: Unfollow a user.</li>
 <li>
-<code>post_dm</code>: Send a direct message to a user.</li>
+<code>post_dm</code>: Send a direct message to a user. Return an id. 
+See section about image posting.</li>
 <li>
 <code>destroy_dm</code>: Destroy a direct message given its id.</li>
+<li>
+<code>user_timeline</code>: Return the timeline of a user (array of tweets).</li>
 </ul><p>You can get more info by reading the services in <code>twitros_msgs/srv</code> folder.</p>
 
 <h2>Topics published</h2>
 
 <p>New tweets are retrieved at a variable rate depending on <a href="https://dev.twitter.com/docs/rate-limiting/1.1" title="Twitter rate limiting">API limits</a>.
+Current rate limits allow a message to be published every minute 
+approximatively.
 Each of the following bullets represents a topic that publishs 
 <code>twitros_msgs/Tweets</code> messages.
-The server succesfully retrieves images (saving to <code>/tmp</code>) and converts them
-to <code>sensors_msgs/Image</code> using <a href="http://opencv.willowgarage.com/documentation/python/reading_and_writing_images_and_video.html" title="OpenCV python Load/Save">OpenCV</a> and <a href="https://ros.org/wiki/cv_bridge" title="cv_bridge wiki">cv_bridge</a>.</p>
+The server succesfully retrieves images (saving to <code>/tmp</code> then deleting) 
+and converts them to <code>sensors_msgs/Image</code> using <a href="http://opencv.willowgarage.com/documentation/python/reading_and_writing_images_and_video.html" title="OpenCV python Load/Save">OpenCV</a> 
+and <a href="https://ros.org/wiki/cv_bridge" title="cv_bridge wiki">cv_bridge</a>.</p>
 
 <ul>
 <li>
-<code>timeline</code>: tweets from your timeline.</li>
+<code>home_timeline</code>: tweets from your timeline.</li>
 <li>
 <code>mentions</code>: tweets that mention you.</li>
 <li>
@@ -131,19 +130,36 @@ to <code>sensors_msgs/Image</code> using <a href="http://opencv.willowgarage.com
 use the same <code>twitros_msgs/Tweet</code> message structure.</li>
 </ul><p>You can get more info by reading the messages in <code>twitros_msgs/msg</code> folder.</p>
 
-<h2>Test script</h2>
+<h2>ROS parameters</h2>
 
-<p>A test script for posting a picture if provided in <code>twitros/scripts/</code>.</p>
-
-<h2>TODO</h2>
+<p>Parameters you can set:</p>
 
 <ul>
 <li>
-<a href="https://github.com/ryanmcgrath/twython" title="Twython">twython</a> is supposed to implement the whole API. More features 
-could be implemented in the ROS server in the future.</li>
-<li>Post images in direct messages (not supposed to be done in directly in
-twitter).</li>
-</ul>
+<code>latch</code>: Topics latch tweets. (default: <code>false</code>).</li>
+<li>
+<code>replace_dm</code>: If it's not possible to send a direct message, replace by
+send a public tweet under the form:
+<pre>@USER TEXT</pre> 
+It can be useful since you can't send a direct message to someone not 
+following you. (default: <code>false</code>).</li>
+</ul><h2>Script</h2>
+
+<p>Some test scripts are given in <code>twitros/scripts/</code>.</p>
+
+<ul>
+<li>
+<code>tweet.py</code>: Post a tweet with images</li>
+<li>
+<code>direct_message.py</code>: Post a tweet with images</li>
+</ul><h2>Images posting</h2>
+
+<p>Twitter support only image posting in tweets and only one image can be 
+joined per tweets. <code>twitros</code> enables to post multiple images indirectly 
+by hosting them on <a href="http://postimage.org" title="PostImage, free image hosting.">postimage</a>. <a href="http://postimage.org" title="PostImage, free image hosting.">postimage</a> is always used when
+you add image to a <code>twitros_msgs/DirectMessage</code> request and add the
+gallery url at the end of the tweet. On <code>twitros_msgs/Post</code> requests,
+it will use <a href="http://postimage.org" title="PostImage, free image hosting.">postimage</a> only if there is more than one.</p>
       </section>
     </div>
 
