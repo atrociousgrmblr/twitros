@@ -37,4 +37,4 @@ if __name__ == '__main__' :
     try:
         direct_message( user = user, text = msg, images = images )
     except rospy.ServiceException, e:
-        rospy.logerr( "Service call failed: " + e )
+        rospy.logerr( e )

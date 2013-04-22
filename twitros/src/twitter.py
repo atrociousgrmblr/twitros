@@ -88,9 +88,7 @@ class TwitterServer:
 	    oauth_token = auth_props['oauth_token']
 	    oauth_token_secret = auth_props['oauth_token_secret']
 
-	    del t
-
-	rospy.loginfo("Using the following parameters for oauth: "
+	    rospy.loginfo("Using the following parameters for oauth: "
 		    + 'key: [{key}], '.format(key = oauth_token)
 		    + 'secret: [{secret}]'.format(secret = oauth_token_secret))
 
@@ -141,23 +139,41 @@ class TwitterServer:
     	if len(req.images) == 1:
 	    path = self.save_image( req.images[0] )
             
-            if (req.reply_id == 0):
-                result = self.t.updateStatusWithMedia( file_ = path, 
-	    		status = req.text )
-	    else:
-                result = self.t.updateStatusWithMedia( file_ = path, 
-	    		status = req.text, in_reply_status_id = req.reply_id )
+	    first = True
+	    for tweet in self.split_tweet( txt ):
+                if (req.reply_id == 0):
+		    if first:
+                        result = self.t.updateStatusWithMedia( file_ = path, 
+	    		    status = tweet )
+			first = False
+		    else:
+                	result = self.t.updateStatus( status = tweet )
+	        else:
+		    if first:
+                        result = self.t.updateStatusWithMedia( file_ = path, 
+	    		    status = tweet, in_reply_status_id = req.reply_id )
+			first = False
+		    else:
+                	result = self.t.updateStatus( status = tweet,
+	    			in_reply_to_status_id = req.reply_id )
+	        if self.t.get_lastfunction_header('status') != '200 OK':
+	            return None
 	    
 	    os.system('rm -f ' + path)
 	
 	elif len(req.images) != 0:
 	    txt +=  upload( req.images )
 	
-        if (req.reply_id == 0):
-            result = self.t.updateStatus( status = txt )
-	else:
-            result = self.t.updateStatus( status = txt,
+	# Publish after splitting.
+	for tweet in self.split_tweet( txt ):
+            if (req.reply_id == 0):
+                result = self.t.updateStatus( status = tweet )
+	    else:
+                result = self.t.updateStatus( status = tweet,
 	    			in_reply_to_status_id = req.reply_id )
+	
+	    if self.t.get_lastfunction_header('status') != '200 OK':
+	        return None
 	
 	# Return false if call failed
 	if self.t.get_lastfunction_header('status') != '200 OK':
@@ -205,36 +221,53 @@ class TwitterServer:
 	# If he can, send a direct message
 	if relation['relationship']['source']['can_dm']:
 	    txt = req.text
-	    # Upload image to postimage.org using requests
-	    if len(req.images) != 0:
-		txt += self.upload( req.images ) 
-            result = self.t.sendDirectMessage( 
-			screen_name = req.user, text = txt )
 
-        # If he cant but was allowed to send a tweet instead, tweet with mention
+	    # Upload image to postimage.org using requests
+	    if len(req.images):
+		txt += self.upload( req.images )
+
+	    for dm in self.split_tweet( txt ):
+                result = self.t.sendDirectMessage( 
+			screen_name = req.user, text = dm )
+	        if self.t.get_lastfunction_header('status') != '200 OK':
+	            return None
+
+        # If Cant dm but allowed to tweet instead, tweet with mention
 	elif self.replace_dm:
 	    rospy.logwarn("You can't send a direct message to " + req.user 
 	    	+ ". Sending a public tweet...")
 	    # One image ---> Twitter
 	    if len(req.images) == 1 :
 	        path = self.save_image( req.images[0] )
-                result = self.t.updateStatusWithMedia( file_ = path, 
-	    		status = req.text )
+
+		first = True
+	        for tweet in self.split_tweet( req.text ):
+		    if first:
+                        result = self.t.updateStatusWithMedia( file_ = path, 
+	    		    status = tweet )
+		        first = False
+		    else:
+                        result = self.t.updateStatus( status = tweet )
+
+	            if self.t.get_lastfunction_header('status') != '200 OK':
+	                return None
+
                 os.system('rm -rf ' + path)
 	    else:
 	    	status = '@' + req.user + ' ' + req.text
 		# Many images ---> postimage.org
 	        if len(req.images) != 0:
 		    status +=  upload( req.images )
-                result = self.t.updateStatus( status = status )
+	        
+		for tweet in self.split_tweet( status ):
+                    result = self.t.updateStatus( status = tweet )
+	            if self.t.get_lastfunction_header('status') != '200 OK':
+	                return None
 	else:
 	    rospy.logwarn("You can't send a direct message to " + req.user)
 	    return None
 
-	if self.t.get_lastfunction_header('status') != '200 OK':
-	    return None
-	else:
-	    return DirectMessageResponse(id = result['id'])
+	return DirectMessageResponse(id = result['id'])
     
     def destroy_cb(self, req):
         result = self.t.destroyDirectMessage( id = req.id )
@@ -255,6 +288,26 @@ class TwitterServer:
 	    else:
 	        rospy.logwarn(req.user + " has no tweets in its timeline.")
 	        return TimelineResponse( )
+
+    # Split a long text into 140 chars tweets
+    def split_tweet(self, text):
+        tweet = ""
+        tweets = []
+
+	words =  text.split(' ')
+	for word in words:
+	    if len(tweet + word + " ") > 137:
+	        tweets.append(tweet.strip() + "...")
+	        # If tweets is intended to a user, begin all tweets with @user
+	        if text.startswith('@'):
+	            tweet = words[0] + " " + word + " "
+	        else:
+	            tweet = "..."
+	    else:
+                tweet = tweet + word + " "
+
+	tweets.append( tweet.strip() )
+	return tweets
 
     # Upload array of sensor_msgs/Image to postimage.org and return link.
     # Link is shortened if possible.

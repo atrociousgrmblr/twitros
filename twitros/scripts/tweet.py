@@ -36,4 +36,4 @@ if __name__ == '__main__' :
     try:
         tweet( text = status, images = images )
     except rospy.ServiceException, e:
-        rospy.logerr( "Service call failed: " + e )
+        rospy.logerr( e )
