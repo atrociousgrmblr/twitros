@@ -100,7 +100,7 @@ send a public tweet under the form:
 It can be useful since you can't send a direct message to someone not 
 following you. (default: <code>false</code>).
 
-Script
+Scripts
 ---
 Some test scripts are given in `twitros/scripts/`.
 
@@ -115,6 +115,11 @@ by hosting them on [postimage] [9]. [postimage] [9] is always used when
 you add image to a `twitros_msgs/DirectMessage` request and add the
 gallery url at the end of the tweet. On `twitros_msgs/Post` requests,
 it will use [postimage] [9] only if there is more than one.
+
+Managing the 140 characters limit
+---
+TwitROS contains a small tweet splitting feature so no need to be careful
+with your tweets before calling `post_tweet` or `post_dm` services.
 
 [1]: https://github.com/ryanmcgrath/twython "Twython"
 [2]: http://ros.org "ROS"
