@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 import os
-from time import time, mktime, strptime
+from time import time, strptime
+from calendar import timegm
 
 # ROS
 import roslib; roslib.load_manifest('twitros')
@@ -176,11 +177,7 @@ class TwitterServer:
             if self.t.get_lastfunction_header('status') != '200 OK':
                 return None
 
-        # Return false if call failed
-        if self.t.get_lastfunction_header('status') != '200 OK':
-            return None
-        else: 
-            return PostResponse(id = result['id'])
+        return PostResponse(id = result['id'])
 
     def retweet_cb(self, req):
         result = self.t.retweet( id = req.id )
@@ -227,16 +224,18 @@ class TwitterServer:
             if len(req.images):
                 txt += self.upload( req.images )
 
-                for dm in self.split_tweet( txt ):
-                    result = self.t.sendDirectMessage( 
-                            screen_name = req.user, text = dm )
-                    if self.t.get_lastfunction_header('status') != '200 OK':
-                        return None
+            for dm in self.split_tweet( txt ):
+                result = self.t.sendDirectMessage( 
+                        screen_name = req.user, text = dm )
+                if self.t.get_lastfunction_header('status') != '200 OK':
+                    return None
+            # Return the id of the last DM posted.
+            return DirectMessageResponse(id = result['id'])
 
         # CASE 2: If Cant dm but allowed to tweet instead, tweet with mention
         elif self.replace_dm:
-            rospy.logwarn("You can't send a direct message to " + req.user 
-                    + ". Sending a public tweet...")
+            rospy.logwarn("You can't send a direct message to " 
+                    + req.user + ". Sending a public tweet instead...")
             # One image ---> Twitter
             if len(req.images) == 1 :
                 path = self.save_image( req.images[0] )
@@ -254,22 +253,25 @@ class TwitterServer:
                         return None
 
                 os.system('rm -rf ' + path)
+                # Return the id of the last DM posted.
+                return DirectMessageResponse(id = result['id'])
             else:
                 status = '@' + req.user + ' ' + req.text
                 # Many images ---> postimage.org
                 if len(req.images) != 0:
                     status +=  upload( req.images )
 
-                    for tweet in self.split_tweet( status ):
-                        result = self.t.updateStatus( status = tweet )
-                        if self.t.get_lastfunction_header('status') != '200 OK':
-                            return None
+            for tweet in self.split_tweet( status ):
+                result = self.t.updateStatus( status = tweet )
+                if self.t.get_lastfunction_header('status') != '200 OK':
+                    return None
+            # Return the id of the last DM posted.
+            return DirectMessageResponse(id = result['id'])
+
         # CASE 3: If can't.
         else:
             rospy.logwarn("You can't send a direct message to " + req.user)
             return None
-
-        return DirectMessageResponse(id = result['id'])
 
     def destroy_cb(self, req):
         result = self.t.destroyDirectMessage( id = req.id )
@@ -392,7 +394,8 @@ class TwitterServer:
 
             # Convert twitter time string to ros Time structure
             ts = strptime( s['created_at'],'%a %b %d %H:%M:%S +0000 %Y' )
-            tweet.stamp = rospy.Time.from_sec( mktime(ts) )
+            #tweet.stamp = rospy.Time.from_sec( mktime(ts) )
+            tweet.stamp = rospy.Time.from_sec( timegm(ts) )
 
             # Handle image. Download, load with OpenCV and convert to ROS
             if 'media' in s['entities']:
@@ -401,8 +404,8 @@ class TwitterServer:
                         rospy.logdebug("Image detected: " + media['media_url'])
 
                         # Download and write image using requests
-                        path = '/tmp/pic_{num}_{time}.{ext}'
-                                .format( num = tweet.id, time = time(),
+                        path = '/tmp/pic_{num}_{time}.{ext}'.format( 
+                                num = tweet.id, time = time(),
                                 ext = media['media_url'].split('.')[-1] )
                         f = open(path, 'wb')
                         f.write( requests.get(media['media_url']).content )
@@ -420,7 +423,7 @@ class TwitterServer:
                             rospy.logerr(e)
                         break
 
-        msg.tweets.append(tweet)
+            msg.tweets.append(tweet)
         return msg
 
     # Convert DM from python-twitter structure to ROS structure
@@ -437,9 +440,10 @@ class TwitterServer:
 
             # Time conversion
             ts = strptime( m['created_at'],'%a %b %d %H:%M:%S +0000 %Y' )
-            tweet.stamp = rospy.Time.from_sec( mktime(ts) )
+            #tweet.stamp = rospy.Time.from_sec( mktime(ts) )
+            tweet.stamp = rospy.Time.from_sec( timegm(ts) )
 
-        msg.tweets.append(tweet)
+            msg.tweets.append(tweet)
         return msg
 
     # Retrieve updates in timeline, mentions, and direct messages
@@ -447,6 +451,7 @@ class TwitterServer:
         # Timeline: To be changed when 1.1 is on.
         response = self.t.getHomeTimeline( 
                 since_id = self.last_timeline, include_entities = True )
+
         # Get headers just after function to avoid getting another call result
         remaining = int( self.t.get_lastfunction_header( 
                 'x-rate-limit-remaining' ))
@@ -472,7 +477,7 @@ class TwitterServer:
                     period, self.timer_home_cb, oneshot = True )
 
     def timer_mentions_cb(self, event):
-        # Mentions (exact same process)
+        # Mentions (exact same process as home timeline)
         response = self.t.getMentionsTimeline( 
                 since_id = self.last_mention, include_entities = True )
 
