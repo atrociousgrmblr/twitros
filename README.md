@@ -6,7 +6,8 @@ Implemented using [twython] [1].
 Developped at [IntRoLab] [4].
 
 Please note that this project in still in its early stage of creation and 
-is unstable at the moment.
+is unstable at the moment. Image posting via twitter is broken right now
+due to `requests`. I hope it's fixed soon...
 
 Dependencies
 ---
@@ -21,11 +22,6 @@ Installation
 After cloning, you can build twitros by running:
 
     rosmake twitros
-
-Don't forget to make the python files runable:
-    
-    roscd twitros
-    chmod +x src/twitter.py
 
 Running the Twitter server
 ---
